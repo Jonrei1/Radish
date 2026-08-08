@@ -28,8 +28,8 @@ export function displayName(p: {
 /**
  * Returns initials for an avatar from first and last name.
  */
-export function initials(firstName: string, lastName: string): string {
-  return `${(firstName[0] ?? '').toUpperCase()}${(lastName[0] ?? '').toUpperCase()}`;
+export function initials(firstName?: string | null, lastName?: string | null): string {
+  return `${(firstName?.[0] ?? '').toUpperCase()}${(lastName?.[0] ?? '').toUpperCase()}`;
 }
 
 /**
@@ -41,7 +41,7 @@ export function groupByLetter<T extends { lastName: string }>(
 ): { letter: string; patients: T[] }[] {
   const map = new Map<string, T[]>();
   for (const p of patients) {
-    const letter = (p.lastName[0] ?? '#').toUpperCase();
+    const letter = (p.lastName?.[0] ?? '#').toUpperCase();
     if (!map.has(letter)) map.set(letter, []);
     map.get(letter)!.push(p);
   }
