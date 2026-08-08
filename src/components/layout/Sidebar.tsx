@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUiStore } from '@/stores/uiStore';
 import { usePatientStore } from '@/stores/patientStore';
@@ -71,14 +72,20 @@ export function Sidebar() {
 
   const canCreatePatient = user?.role === 'DOCTOR' || user?.role === 'ADMIN';
 
+  const router = useRouter();
+
   const handleSelect = (p: PatientRecord) => {
     setActivePatient(p);
+    qc.setQueryData(['patient', p.id], p);
   };
 
   const handlePrefetch = (patientId: string) => {
     qc.prefetchQuery({
       queryKey: ['patient', patientId],
-      queryFn: () => apiRequest(`/patients/${patientId}`),
+      queryFn: async () => {
+        const res = await apiRequest<{ patient: PatientRecord }>(`/patients/${patientId}`);
+        return res.patient;
+      },
       staleTime: 30000,
     });
     qc.prefetchQuery({
@@ -256,6 +263,7 @@ export function Sidebar() {
         onCreated={(p) => {
           setNewPatientOpen(false);
           handleSelect(p);
+          router.push(`/dashboard/${p.id}/notes`);
         }}
       />
     </>

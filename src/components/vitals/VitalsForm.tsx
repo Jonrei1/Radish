@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePatient, VitalSignRecord, CreateVitalsInput, UpdateVitalsInput } from '@/hooks/usePatients';
+import { usePatientStore } from '@/stores/patientStore';
 import { initials, calcAge } from '@/lib/patient-utils';
 import { X } from 'lucide-react';
 
@@ -22,6 +23,8 @@ function VitalsFormDialog({
   saving,
 }: Omit<VitalsFormModalProps, 'open'>) {
   const { data: patient } = usePatient(patientId);
+  const { activePatient } = usePatientStore();
+  const currentPatient = patient || (activePatient?.id === patientId ? activePatient : undefined);
 
   // Form state initialized from editing record or blank
   const [sbp, setSbp] = useState<string>(() => editing?.sbp?.toString() ?? '');
@@ -120,21 +123,21 @@ function VitalsFormDialog({
         </div>
 
         {/* Patient Identifier Banner */}
-        {patient && (
+        {currentPatient && (
           <div className="flex items-center gap-3 px-[18px] py-2 bg-surface-2 border-b border-border">
             <div className="w-8 h-8 rounded-full bg-accent-light border border-accent flex items-center justify-center text-[11px] font-bold text-accent-hover flex-shrink-0">
-              {initials(patient.firstName, patient.lastName)}
+              {initials(currentPatient.firstName, currentPatient.lastName)}
             </div>
             <div className="flex items-center gap-2 text-[12px]">
               <span className="font-bold text-text-primary">
-                {patient.lastName}, {patient.firstName}
+                {currentPatient.lastName}, {currentPatient.firstName}
               </span>
               <span className="font-mono text-[10px] text-text-muted bg-surface border border-border rounded px-1.5 py-[1px]">
-                #{patient.patientCode}
+                #{currentPatient.patientCode}
               </span>
               <span className="text-text-muted ml-2">
-                {patient.sex === 'MALE' ? 'M' : patient.sex === 'FEMALE' ? 'F' : 'O'} •{' '}
-                {calcAge(patient.dateOfBirth)} yrs
+                {currentPatient.sex === 'MALE' ? 'M' : currentPatient.sex === 'FEMALE' ? 'F' : 'O'} •{' '}
+                {calcAge(currentPatient.dateOfBirth)} yrs
               </span>
             </div>
           </div>

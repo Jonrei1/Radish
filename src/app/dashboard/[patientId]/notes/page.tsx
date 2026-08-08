@@ -52,7 +52,7 @@ export default function NotesPage({
       await createNote.mutateAsync({
         notes: notesText.trim(),
         orders: ordersText.trim() || undefined,
-        noteDatetime: noteDatetime ? new Date(noteDatetime).toISOString() : undefined,
+        noteDatetime: new Date().toISOString(),
       });
 
       toast.success('Clinical note recorded successfully');
@@ -101,7 +101,7 @@ export default function NotesPage({
           </div>
 
           <form onSubmit={handleCreateNote} className="p-4 flex flex-col gap-4">
-            {/* Datetime picker */}
+            {/* Datetime (Uneditable / Read-only) */}
             <div className="flex flex-col gap-1 max-w-[260px]">
               <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-[0.5px]">
                 Date & Time
@@ -109,8 +109,9 @@ export default function NotesPage({
               <input
                 type="datetime-local"
                 value={noteDatetime}
-                onChange={(e) => setNoteDatetime(e.target.value)}
-                className="h-[34px] px-2.5 bg-surface border border-border rounded-btn text-[12px] font-mono text-text-primary outline-none focus:border-accent focus:shadow-accent-focus transition-all"
+                readOnly
+                disabled
+                className="h-[34px] px-2.5 bg-surface-2 border border-border rounded-btn text-[12px] font-mono text-text-muted outline-none cursor-not-allowed select-none transition-all"
               />
             </div>
 
