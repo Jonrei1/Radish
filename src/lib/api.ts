@@ -1,9 +1,27 @@
 import { useAuthStore } from '@/stores/authStore';
 
+export function normalizeApiPath(path: string): string {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  if (path.startsWith('/api/')) {
+    return path;
+  }
+  if (path.startsWith('/api?')) {
+    return path;
+  }
+  if (path.startsWith('/')) {
+    return `/api${path}`;
+  }
+  return `/api/${path}`;
+}
+
 export async function apiRequest<T = unknown>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const url = normalizeApiPath(path);
+
   const headers = new Headers({
     'Content-Type': 'application/json',
     ...options.headers,
@@ -13,7 +31,7 @@ export async function apiRequest<T = unknown>(
     headers.delete('Content-Type');
   }
 
-  const res = await fetch(path, {
+  const res = await fetch(url, {
     credentials: 'same-origin',
     ...options,
     headers,
