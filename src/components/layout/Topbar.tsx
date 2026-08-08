@@ -85,8 +85,8 @@ export function Topbar() {
               <span
                 className={`inline-flex items-center justify-center px-1.5 py-[2px] rounded text-[9px] font-bold uppercase tracking-wider border ${
                   user.role === 'DOCTOR'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-purple-50 text-purple-700 border-purple-200'
+                    ? 'bg-accent-light text-text-primary border-accent'
+                    : 'bg-purple-bg text-purple border-purple-border'
                 }`}
               >
                 {user.role === 'DOCTOR' ? 'Doctor' : 'Admin'}

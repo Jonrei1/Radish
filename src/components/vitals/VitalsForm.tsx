@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePatient, VitalSignRecord, CreateVitalsInput, UpdateVitalsInput } from '@/hooks/usePatients';
-import { initials } from '@/lib/patient-utils';
+import { initials, calcAge } from '@/lib/patient-utils';
 import { X } from 'lucide-react';
 
 interface VitalsFormModalProps {
@@ -134,7 +134,7 @@ function VitalsFormDialog({
               </span>
               <span className="text-text-muted ml-2">
                 {patient.sex === 'MALE' ? 'M' : patient.sex === 'FEMALE' ? 'F' : 'O'} •{' '}
-                {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()}y
+                {calcAge(patient.dateOfBirth)} yrs
               </span>
             </div>
           </div>

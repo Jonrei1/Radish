@@ -41,7 +41,7 @@ async function verifyTokenFast(token: string): Promise<QuickPayload | null> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Static files and Next internals are always public

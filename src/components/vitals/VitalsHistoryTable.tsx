@@ -149,7 +149,10 @@ export function VitalsHistoryTable({
                       {v.measuredBySnapshot ? (
                         <div className="flex items-center gap-1.5">
                           <span className="truncate">
-                            {v.measuredBySnapshot.firstName} {v.measuredBySnapshot.lastName[0]}.
+                            {v.measuredBySnapshot.firstName}{' '}
+                            {v.measuredBySnapshot.lastName
+                              ? `${v.measuredBySnapshot.lastName[0]}.`
+                              : ''}
                           </span>
                           <span className="text-[9px] font-bold uppercase tracking-[0.5px] px-1.5 py-0.5 rounded bg-surface-3 text-text-muted border border-border">
                             {v.measuredBySnapshot.role}

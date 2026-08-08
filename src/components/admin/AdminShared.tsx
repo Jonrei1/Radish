@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export const RoleBadge = ({ role }: { role: string }) => {
   const map: Record<string, string> = {
     ADMIN: 'bg-purple-bg text-purple border-purple-border',
-    DOCTOR: 'bg-accent-light text-accent-hover border-accent',
+    DOCTOR: 'bg-accent-light text-text-primary border-accent',
   };
   return (
     <span

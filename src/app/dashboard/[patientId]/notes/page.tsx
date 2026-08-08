@@ -220,7 +220,8 @@ export default function NotesPage({
                 <div className="flex items-center justify-between border-b border-border/50 pb-2.5 flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[13px] font-bold text-text-primary">
-                      Dr. {note.authorSnapshot?.firstName} {note.authorSnapshot?.lastName}
+                      {note.authorSnapshot?.role === 'DOCTOR' ? 'Dr. ' : ''}
+                      {note.authorSnapshot?.firstName} {note.authorSnapshot?.lastName}
                     </span>
                     <RoleBadge role={note.authorSnapshot?.role || 'DOCTOR'} />
                     {note.authorSnapshot?.licenseNumber && (

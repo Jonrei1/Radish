@@ -193,7 +193,7 @@ export function Sidebar() {
 
                   {/* Status indicator */}
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-green" />
                   </div>
                 </Link>
               );
