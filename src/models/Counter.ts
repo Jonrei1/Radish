@@ -29,7 +29,7 @@ export async function getNextPatientCode(): Promise<string> {
   const counter = await Counter.findOneAndUpdate(
     { _id: 'patientCode' },
     { $inc: { seq: 1 } },
-    { upsert: true, new: true, returnDocument: 'after' }
+    { upsert: true, returnDocument: 'after' }
   );
 
   if (!counter) {
