@@ -62,6 +62,12 @@ export interface CreateNoteInput {
   noteDatetime?: string;
 }
 
+export interface UpdateNoteInput {
+  id: string;
+  notes?: string;
+  orders?: string;
+}
+
 export interface VitalSignRecord {
   id: string;
   patientId: string;
@@ -179,6 +185,25 @@ export function useCreateNote(patientId: string) {
         {
           method: 'POST',
           body: JSON.stringify(input),
+        }
+      );
+      return res.note;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes', patientId] });
+    },
+  });
+}
+
+export function useUpdateNote(patientId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...body }: UpdateNoteInput) => {
+      const res = await apiRequest<{ note: NoteRecord; message: string }>(
+        `/notes/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(body),
         }
       );
       return res.note;

@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, use } from 'react';
-import { usePatientNotes, useCreateNote, useDeleteNote, NoteRecord } from '@/hooks/usePatients';
+import {
+  usePatientNotes,
+  useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
+  NoteRecord,
+  UpdateNoteInput,
+} from '@/hooks/usePatients';
 import { useAuthStore } from '@/stores/authStore';
-import { RoleBadge } from '@/components/admin/AdminShared';
 import { DeleteConfirmModal } from '@/components/ui/DeleteConfirmModal';
-import { Skeleton } from '@/components/ui/skeleton';
+import { NotesHistory, EditNoteModal } from '@/components/notes';
 import { toast } from 'sonner';
-import { Trash2, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 
 export default function NotesPage({
   params,
@@ -20,6 +25,7 @@ export default function NotesPage({
 
   const { data, isLoading } = usePatientNotes(patientId);
   const createNote = useCreateNote(patientId);
+  const updateNote = useUpdateNote(patientId);
   const deleteNote = useDeleteNote(patientId);
 
   // Composer form state
@@ -33,11 +39,11 @@ export default function NotesPage({
     )}:${pad(d.getMinutes())}`;
   });
 
+  const [editingNote, setEditingNote] = useState<NoteRecord | null>(null);
   const [confirmDeleteNote, setConfirmDeleteNote] = useState<NoteRecord | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isDoctor = user?.role === 'DOCTOR';
-  const isAdmin = user?.role === 'ADMIN';
 
   const notesList = data?.data || [];
 
@@ -67,6 +73,17 @@ export default function NotesPage({
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to record note';
+      toast.error(msg);
+    }
+  };
+
+  const handleUpdateNote = async (values: UpdateNoteInput) => {
+    try {
+      await updateNote.mutateAsync(values);
+      toast.success('Clinical note updated successfully');
+      setEditingNote(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update note';
       toast.error(msg);
     }
   };
@@ -158,130 +175,23 @@ export default function NotesPage({
         </div>
       )}
 
-      {/* Series Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-bold text-text-primary font-sans flex items-center gap-2">
-          <span>Clinical Notes History</span>
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-text-secondary border border-border">
-            {notesList.length} total
-          </span>
-        </h2>
-        <span className="text-[11px] text-text-muted">Arranged newest to oldest</span>
-      </div>
+      {/* Clinical Notes History */}
+      <NotesHistory
+        notes={notesList}
+        isLoading={isLoading}
+        onEdit={(note) => setEditingNote(note)}
+        onDelete={(note) => setConfirmDeleteNote(note)}
+        deletingId={deletingId}
+      />
 
-      {/* Notes Series List (Newest → Oldest) */}
-      <div className="flex flex-col gap-3.5">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="bg-surface border border-border rounded-card p-4 flex flex-col gap-3 shadow-card animate-pulse"
-            >
-              <div className="flex justify-between items-center">
-                <Skeleton width={140} height={14} borderRadius={4} />
-                <Skeleton width={100} height={12} borderRadius={4} />
-              </div>
-              <Skeleton width="100%" height={48} borderRadius={6} />
-            </div>
-          ))
-        ) : notesList.length === 0 ? (
-          <div className="bg-surface border border-border rounded-card p-8 text-center text-[13px] text-text-muted italic shadow-card">
-            No clinical notes recorded yet for this patient.
-          </div>
-        ) : (
-          notesList.map((note) => {
-            const dt = new Date(note.noteDatetime);
-            const dateStr = dt.toLocaleDateString('en-PH', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            });
-            const timeStr = dt.toLocaleTimeString('en-PH', {
-              hour: '2-digit',
-              minute: '2-digit',
-            });
-
-            const isAuthor = user && note.authorId === user.id;
-            const canDelete = !note.isDeleted && (isAuthor || isAdmin);
-            const isGhost = note.isDeleted;
-            const strikeClass = isGhost
-              ? 'opacity-55 grayscale blur-[0.5px] line-through decoration-text-muted/65 select-none hover:opacity-75 hover:blur-none transition-all'
-              : '';
-
-            return (
-              <div
-                key={note.id}
-                className={cn(
-                  'bg-surface border rounded-card p-4 shadow-card flex flex-col gap-3.5 transition-all duration-150',
-                  isGhost ? 'border-border bg-surface-2/40' : 'border-border hover:border-border-strong',
-                  strikeClass
-                )}
-              >
-                {/* Note Card Header: Author, Role, Date/Time, Delete */}
-                <div className="flex items-center justify-between border-b border-border/50 pb-2.5 flex-wrap gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[13px] font-bold text-text-primary">
-                      {note.authorSnapshot?.role === 'DOCTOR' ? 'Dr. ' : ''}
-                      {note.authorSnapshot?.firstName} {note.authorSnapshot?.lastName}
-                    </span>
-                    <RoleBadge role={note.authorSnapshot?.role || 'DOCTOR'} />
-                    {note.authorSnapshot?.licenseNumber && (
-                      <span className="text-[10px] font-mono text-text-muted bg-surface-2 border border-border px-1.5 py-[1px] rounded">
-                        Lic: {note.authorSnapshot.licenseNumber}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-mono text-[11px] text-text-muted">
-                      {dateStr} · {timeStr}
-                    </span>
-                    {isGhost ? (
-                      <span className="text-[9px] font-bold uppercase tracking-[0.5px] px-1.5 py-0.5 rounded bg-red-bg text-red border border-red-border">
-                        Deleted
-                      </span>
-                    ) : (
-                      canDelete && (
-                        <button
-                          onClick={() => setConfirmDeleteNote(note)}
-                          title="Delete note"
-                          aria-label="Delete note"
-                          className="h-[24px] px-2 rounded text-[10px] font-semibold bg-red-bg text-red border border-red-border hover:bg-red-bg/80 transition-all duration-150 cursor-pointer inline-flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Delete
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                {/* Notes Section */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.6px] text-text-muted">
-                    Notes
-                  </span>
-                  <p className="text-[13px] text-text-primary leading-relaxed whitespace-pre-wrap font-sans">
-                    {note.notes}
-                  </p>
-                </div>
-
-                {/* Orders Section (Omitted if empty) */}
-                {note.orders && note.orders.trim() !== '' && (
-                  <div className="flex flex-col gap-1 bg-surface-2 border border-border rounded-btn p-3 mt-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.6px] text-accent">
-                      Orders
-                    </span>
-                    <p className="text-[12px] text-text-secondary leading-relaxed whitespace-pre-wrap font-sans">
-                      {note.orders}
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+      {/* Edit Note Modal */}
+      <EditNoteModal
+        open={editingNote !== null}
+        onClose={() => setEditingNote(null)}
+        note={editingNote}
+        onSave={handleUpdateNote}
+        isSaving={updateNote.isPending}
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
