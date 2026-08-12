@@ -13,7 +13,7 @@ function getJwtSecretKey(): Uint8Array {
 
 interface QuickPayload {
   sub: string;
-  role: 'DOCTOR' | 'ADMIN';
+  role: 'DOCTOR' | 'NURSE' | 'ADMIN';
   sid: string;
 }
 
@@ -26,7 +26,7 @@ async function verifyTokenFast(token: string): Promise<QuickPayload | null> {
 
     if (
       typeof payload.sub === 'string' &&
-      (payload.role === 'DOCTOR' || payload.role === 'ADMIN') &&
+      (payload.role === 'DOCTOR' || payload.role === 'NURSE' || payload.role === 'ADMIN') &&
       typeof payload.sid === 'string'
     ) {
       return {

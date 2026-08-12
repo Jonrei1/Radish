@@ -12,7 +12,7 @@ const CreateAccountSchema = z
     lastName: z.string().min(2, 'Last name must be at least 2 characters').max(30),
     middleName: z.string().max(30).optional().or(z.literal('')),
     extension: z.string().max(10).optional().or(z.literal('')),
-    role: z.enum(['DOCTOR', 'ADMIN']),
+    role: z.enum(['DOCTOR', 'NURSE', 'ADMIN']),
     licenseNumber: z.string().max(30).optional().or(z.literal('')),
   })
   .strict()
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     const isActiveParam = searchParams.get('isActive');
 
     const filter: Record<string, unknown> = {};
-    if (roleParam && (roleParam === 'DOCTOR' || roleParam === 'ADMIN')) {
+    if (roleParam && (roleParam === 'DOCTOR' || roleParam === 'NURSE' || roleParam === 'ADMIN')) {
       filter.role = roleParam;
     }
     if (isActiveParam !== null && isActiveParam !== undefined && isActiveParam !== '') {
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
       middleName: middleName?.trim() || undefined,
       extension: extension?.trim() || undefined,
       role: role as UserRole,
-      licenseNumber: licenseNumber?.trim() || undefined,
+      licenseNumber: role === 'DOCTOR' ? (licenseNumber?.trim() || undefined) : undefined,
       isActive: true,
       requiresPasswordChange: true,
     });

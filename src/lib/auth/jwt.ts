@@ -52,7 +52,7 @@ export async function verifySessionJwt(token: string): Promise<SessionJwtPayload
 
     if (
       typeof payload.sub !== 'string' ||
-      (payload.role !== 'DOCTOR' && payload.role !== 'ADMIN') ||
+      (payload.role !== 'DOCTOR' && payload.role !== 'NURSE' && payload.role !== 'ADMIN') ||
       typeof payload.sid !== 'string'
     ) {
       return null;

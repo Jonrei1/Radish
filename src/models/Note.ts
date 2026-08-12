@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export interface IAuthorSnapshot {
   firstName: string;
   lastName: string;
-  role: 'DOCTOR' | 'ADMIN';
+  role: 'DOCTOR' | 'NURSE' | 'ADMIN';
   licenseNumber?: string;
 }
 
@@ -37,7 +37,7 @@ const NoteSchema = new Schema<INote>(
     authorSnapshot: {
       firstName: { type: String, required: true, trim: true },
       lastName: { type: String, required: true, trim: true },
-      role: { type: String, enum: ['DOCTOR', 'ADMIN'], required: true },
+      role: { type: String, enum: ['DOCTOR', 'NURSE', 'ADMIN'], required: true },
       licenseNumber: { type: String, trim: true },
     },
     noteDatetime: {

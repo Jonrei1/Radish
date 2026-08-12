@@ -13,6 +13,8 @@ import {
 import type { VitalSignRecord } from '@/hooks/usePatients';
 import { useAuthStore } from '@/stores/authStore';
 
+import { RoleBadge } from '@/components/admin/AdminShared';
+
 interface VitalsHistoryTableProps {
   vitals: VitalSignRecord[];
   onEdit: (vital: VitalSignRecord) => void;
@@ -35,8 +37,8 @@ export function VitalsHistoryTable({
   deletingId,
 }: VitalsHistoryTableProps) {
   const { user } = useAuthStore();
-  const canEdit = user?.role === 'DOCTOR' || user?.role === 'ADMIN';
-  const canDelete = user?.role === 'DOCTOR' || user?.role === 'ADMIN';
+  const canEdit = user?.role === 'DOCTOR' || user?.role === 'NURSE' || user?.role === 'ADMIN';
+  const canDelete = user?.role === 'DOCTOR' || user?.role === 'NURSE' || user?.role === 'ADMIN';
 
   const sortedVitals = useMemo(() => {
     return [...vitals].sort((a, b) => {
@@ -154,9 +156,7 @@ export function VitalsHistoryTable({
                               ? `${v.measuredBySnapshot.lastName[0]}.`
                               : ''}
                           </span>
-                          <span className="text-[9px] font-bold uppercase tracking-[0.5px] px-1.5 py-0.5 rounded bg-surface-3 text-text-muted border border-border">
-                            {v.measuredBySnapshot.role}
-                          </span>
+                          <RoleBadge role={v.measuredBySnapshot.role} />
                         </div>
                       ) : (
                         <span className="text-text-muted italic">—</span>

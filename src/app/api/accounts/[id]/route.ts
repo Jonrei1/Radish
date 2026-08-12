@@ -12,7 +12,7 @@ const UpdateAccountSchema = z
     lastName: z.string().min(2).max(30).optional(),
     middleName: z.string().max(30).optional().nullable(),
     extension: z.string().max(10).optional().nullable(),
-    role: z.enum(['DOCTOR', 'ADMIN']).optional(),
+    role: z.enum(['DOCTOR', 'NURSE', 'ADMIN']).optional(),
     licenseNumber: z.string().max(30).optional().nullable(),
     isActive: z.boolean().optional(),
   })
@@ -124,7 +124,9 @@ export async function PATCH(
       targetUser.extension = updates.extension ? updates.extension.trim() : undefined;
     }
     if (updates.role !== undefined) targetUser.role = updates.role as UserRole;
-    if (updates.licenseNumber !== undefined) {
+    if (targetUser.role !== 'DOCTOR') {
+      targetUser.licenseNumber = undefined;
+    } else if (updates.licenseNumber !== undefined) {
       targetUser.licenseNumber = updates.licenseNumber ? updates.licenseNumber.trim() : undefined;
     }
     if (updates.isActive !== undefined) targetUser.isActive = updates.isActive;

@@ -38,7 +38,7 @@ export default function VitalsPage({
   const [confirmDeleteVital, setConfirmDeleteVital] = useState<VitalSignRecord | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const canRecord = user?.role === 'DOCTOR' || user?.role === 'ADMIN';
+  const canRecord = user?.role === 'DOCTOR' || user?.role === 'NURSE' || user?.role === 'ADMIN';
 
   const vitalsList = data?.data || [];
   const meta = data?.meta || { total: 0, page: 1, limit: 20, totalPages: 1 };

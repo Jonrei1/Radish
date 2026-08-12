@@ -12,36 +12,30 @@ interface EditNoteModalProps {
   isSaving?: boolean;
 }
 
-export function EditNoteModal({
-  open,
+function EditNoteDialog({
   onClose,
   note,
   onSave,
   isSaving = false,
-}: EditNoteModalProps) {
-  const [notesText, setNotesText] = useState('');
-  const [ordersText, setOrdersText] = useState('');
+}: {
+  onClose: () => void;
+  note: NoteRecord;
+  onSave: (values: UpdateNoteInput) => void;
+  isSaving?: boolean;
+}) {
+  const [notesText, setNotesText] = useState(note.notes || '');
+  const [ordersText, setOrdersText] = useState(note.orders || '');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (note) {
-      setNotesText(note.notes || '');
-      setOrdersText(note.orders || '');
-      setError(null);
-    }
-  }, [note, open]);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
-
-  if (!open || !note) return null;
+  }, [onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,5 +151,25 @@ export function EditNoteModal({
         </form>
       </div>
     </div>
+  );
+}
+
+export function EditNoteModal({
+  open,
+  onClose,
+  note,
+  onSave,
+  isSaving = false,
+}: EditNoteModalProps) {
+  if (!open || !note) return null;
+
+  return (
+    <EditNoteDialog
+      key={note.id}
+      onClose={onClose}
+      note={note}
+      onSave={onSave}
+      isSaving={isSaving}
+    />
   );
 }

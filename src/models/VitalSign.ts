@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export interface IMeasuredBySnapshot {
   firstName: string;
   lastName: string;
-  role: 'DOCTOR' | 'ADMIN';
+  role: 'DOCTOR' | 'NURSE' | 'ADMIN';
 }
 
 export interface IVitalSign extends Document {
@@ -61,7 +61,7 @@ const VitalSignSchema = new Schema<IVitalSign>(
     measuredBySnapshot: {
       firstName: { type: String, required: true, trim: true },
       lastName: { type: String, required: true, trim: true },
-      role: { type: String, enum: ['DOCTOR', 'ADMIN'], required: true },
+      role: { type: String, enum: ['DOCTOR', 'NURSE', 'ADMIN'], required: true },
     },
     isDeleted: {
       type: Boolean,

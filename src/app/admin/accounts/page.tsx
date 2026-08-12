@@ -27,7 +27,7 @@ interface Account {
   lastName: string;
   middleName?: string;
   extension?: string;
-  role: 'DOCTOR' | 'ADMIN';
+  role: 'DOCTOR' | 'NURSE' | 'ADMIN';
   isActive: boolean;
   requiresPasswordChange: boolean;
   createdAt: string;
@@ -54,7 +54,7 @@ function CreateAccountModal({
     lastName: '',
     middleName: '',
     extension: '',
-    role: 'DOCTOR' as 'DOCTOR' | 'ADMIN',
+    role: 'DOCTOR' as 'DOCTOR' | 'NURSE' | 'ADMIN',
     licenseNumber: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -245,6 +245,7 @@ function CreateAccountModal({
               )}
             >
               <option value="DOCTOR">Doctor</option>
+              <option value="NURSE">Nurse</option>
               <option value="ADMIN">Admin</option>
             </select>
           </Field>
@@ -451,6 +452,7 @@ function EditAccountDialog({
               )}
             >
               <option value="DOCTOR">Doctor</option>
+              <option value="NURSE">Nurse</option>
               <option value="ADMIN">Admin</option>
             </select>
           </Field>

@@ -86,10 +86,12 @@ export function Topbar() {
                 className={`inline-flex items-center justify-center px-1.5 py-[2px] rounded text-[9px] font-bold uppercase tracking-wider border ${
                   user.role === 'DOCTOR'
                     ? 'bg-accent-light text-text-primary border-accent'
+                    : user.role === 'NURSE'
+                    ? 'bg-blue-bg text-blue border-blue-border'
                     : 'bg-purple-bg text-purple border-purple-border'
                 }`}
               >
-                {user.role === 'DOCTOR' ? 'Doctor' : 'Admin'}
+                {user.role === 'DOCTOR' ? 'Doctor' : user.role === 'NURSE' ? 'Nurse' : 'Admin'}
               </span>
             )}
             {user?.role === 'DOCTOR' && user.licenseNumber && (

@@ -128,7 +128,7 @@ export async function POST(
   try {
     await dbConnect();
     const { user } = await requireUser(req);
-    requireRole(user, ['DOCTOR', 'ADMIN']);
+    requireRole(user, ['DOCTOR', 'NURSE', 'ADMIN']);
 
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {

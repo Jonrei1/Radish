@@ -59,7 +59,7 @@ export async function PATCH(
   try {
     await dbConnect();
     const { user } = await requireUser(req);
-    requireRole(user, ['DOCTOR', 'ADMIN']);
+    requireRole(user, ['DOCTOR', 'NURSE', 'ADMIN']);
 
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -134,7 +134,7 @@ export async function DELETE(
   try {
     await dbConnect();
     const { user } = await requireUser(req);
-    requireRole(user, ['DOCTOR', 'ADMIN']);
+    requireRole(user, ['DOCTOR', 'NURSE', 'ADMIN']);
 
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
