@@ -167,10 +167,13 @@ export function useUpdatePatient(patientId: string) {
   });
 }
 
-export function usePatientNotes(patientId: string | undefined | null) {
-  return useQuery<{ data: NoteRecord[] }>({
-    queryKey: ['notes', patientId],
-    queryFn: () => apiRequest<{ data: NoteRecord[] }>(`/patients/${patientId}/notes`),
+export function usePatientNotes(patientId: string | undefined | null, page = 1, limit = 1) {
+  return useQuery<{ data: NoteRecord[]; meta: { total: number; page: number; limit: number; totalPages: number } }>({
+    queryKey: ['notes', patientId, page, limit],
+    queryFn: () =>
+      apiRequest<{ data: NoteRecord[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
+        `/patients/${patientId}/notes?page=${page}&limit=${limit}`
+      ),
     enabled: !!patientId,
     staleTime: 10000,
   });

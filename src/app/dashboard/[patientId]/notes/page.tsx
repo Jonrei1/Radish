@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import {
   usePatientNotes,
   useCreateNote,
@@ -15,6 +15,14 @@ import { NotesHistory, EditNoteModal } from '@/components/notes';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 
+// Formats a Date into the value shape a `datetime-local` input expects (local time, minute precision).
+function formatLocalDatetime(d: Date) {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
+
 export default function NotesPage({
   params,
 }: {
@@ -23,7 +31,10 @@ export default function NotesPage({
   const { patientId } = use(params);
   const { user } = useAuthStore();
 
-  const { data, isLoading } = usePatientNotes(patientId);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(1);
+
+  const { data, isLoading } = usePatientNotes(patientId, page, limit);
   const createNote = useCreateNote(patientId);
   const updateNote = useUpdateNote(patientId);
   const deleteNote = useDeleteNote(patientId);
@@ -31,13 +42,16 @@ export default function NotesPage({
   // Composer form state
   const [notesText, setNotesText] = useState('');
   const [ordersText, setOrdersText] = useState('');
-  const [noteDatetime, setNoteDatetime] = useState(() => {
-    const d = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}`;
-  });
+  const [noteDatetime, setNoteDatetime] = useState(() => formatLocalDatetime(new Date()));
+
+  // Keep the displayed (read-only) datetime ticking in real time so it never goes
+  // stale while the doctor stays on the page, and always matches what gets submitted.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNoteDatetime(formatLocalDatetime(new Date()));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [editingNote, setEditingNote] = useState<NoteRecord | null>(null);
   const [confirmDeleteNote, setConfirmDeleteNote] = useState<NoteRecord | null>(null);
@@ -46,6 +60,12 @@ export default function NotesPage({
   const isDoctor = user?.role === 'DOCTOR';
 
   const notesList = data?.data || [];
+  const meta = data?.meta || { total: 0, page: 1, limit, totalPages: 1 };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
 
   const handleCreateNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,22 +75,18 @@ export default function NotesPage({
     }
 
     try {
+      // Submit the exact timestamp shown in the (read-only) Date & Time field, rather than
+      // re-reading the clock, so what the doctor sees always matches what gets recorded.
       await createNote.mutateAsync({
         notes: notesText.trim(),
         orders: ordersText.trim() || undefined,
-        noteDatetime: new Date().toISOString(),
+        noteDatetime: new Date(noteDatetime).toISOString(),
       });
 
       toast.success('Clinical note recorded successfully');
+      setPage(1);
       setNotesText('');
       setOrdersText('');
-      const d = new Date();
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      setNoteDatetime(
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-          d.getHours()
-        )}:${pad(d.getMinutes())}`
-      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to record note';
       toast.error(msg);
@@ -105,7 +121,22 @@ export default function NotesPage({
 
   return (
     <div className="flex flex-col gap-5 max-w-[900px] w-full">
-      {/* Pinned Composer Card — Visible to DOCTOR only */}
+      {/* Clinical Notes History (with pagination) */}
+      <NotesHistory
+        notes={notesList}
+        isLoading={isLoading}
+        onEdit={(note) => setEditingNote(note)}
+        onDelete={(note) => setConfirmDeleteNote(note)}
+        deletingId={deletingId}
+        total={meta.total}
+        page={meta.page}
+        totalPages={meta.totalPages}
+        onPageChange={setPage}
+        limit={limit}
+        onLimitChange={handleLimitChange}
+      />
+
+      {/* New Clinical Note Composer — Visible to DOCTOR only, placed after the paginated history and excluded from pagination */}
       {isDoctor && (
         <div className="bg-surface border border-border border-l-[3px] border-l-accent rounded-card shadow-card overflow-hidden">
           <div className="flex items-center gap-2.5 px-4 py-3 bg-surface-2 border-b border-border">
@@ -174,15 +205,6 @@ export default function NotesPage({
           </form>
         </div>
       )}
-
-      {/* Clinical Notes History */}
-      <NotesHistory
-        notes={notesList}
-        isLoading={isLoading}
-        onEdit={(note) => setEditingNote(note)}
-        onDelete={(note) => setConfirmDeleteNote(note)}
-        deletingId={deletingId}
-      />
 
       {/* Edit Note Modal */}
       <EditNoteModal

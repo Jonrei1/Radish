@@ -37,10 +37,20 @@ export async function GET(
       return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
     }
 
+    const searchParams = req.nextUrl.searchParams;
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '1', 10)));
+    const skip = (page - 1) * limit;
+
     // Newest -> oldest, includes soft-deleted notes for client ghost row rendering
-    const notes = await Note.find({ patientId: id })
-      .sort({ noteDatetime: -1, createdAt: -1 })
-      .lean<INote[]>();
+    const [notes, total] = await Promise.all([
+      Note.find({ patientId: id })
+        .sort({ noteDatetime: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean<INote[]>(),
+      Note.countDocuments({ patientId: id }),
+    ]);
 
     const formattedNotes = notes.map((n) => ({
       id: n._id.toString(),
@@ -60,10 +70,10 @@ export async function GET(
     return NextResponse.json({
       data: formattedNotes,
       meta: {
-        total: formattedNotes.length,
-        page: 1,
-        limit: formattedNotes.length || 1,
-        totalPages: 1,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
       },
     });
   } catch (error) {
