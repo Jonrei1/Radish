@@ -172,7 +172,7 @@ export function NotesHistory({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[13px] font-bold text-text-primary">
                         {note.authorSnapshot?.role === 'DOCTOR' ? 'Dr. ' : ''}
-                        {note.authorSnapshot?.firstName} {note.authorSnapshot?.lastName}
+                        {note.authorSnapshot?.lastName}, {note.authorSnapshot?.firstName}
                       </span>
                       <RoleBadge role={note.authorSnapshot?.role || 'DOCTOR'} />
                       {note.authorSnapshot?.licenseNumber && (

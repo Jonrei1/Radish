@@ -128,7 +128,7 @@ export default function ChangePasswordPage() {
               Change Temporary Password
             </h1>
             <p className="text-[12px] text-text-muted mt-1 mb-0">
-              {user.firstName} {user.lastName} · {user.email}
+              {user.lastName}, {user.firstName} · {user.email}
             </p>
           </div>
 

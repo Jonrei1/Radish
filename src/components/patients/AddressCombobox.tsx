@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect, useId } from 'react';
+import { useState, useRef, useEffect, useId, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const emptySubscribe = () => () => {};
 
 interface AddressComboboxProps {
   label?: string;
@@ -34,7 +36,7 @@ export function AddressCombobox({
 }: AddressComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [coords, setCoords] = useState<{ top: number; left: number; width: number }>({
     top: 0,
     left: 0,
@@ -50,10 +52,6 @@ export function AddressCombobox({
   const filteredOptions = options.filter((opt) =>
     opt.toLowerCase().includes((value || '').toLowerCase())
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const updatePosition = () => {
     if (inputRef.current) {

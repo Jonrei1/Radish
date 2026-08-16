@@ -163,20 +163,6 @@ function CreateAccountModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="First Name" required>
-              <input
-                className={cn(
-                  inputClassName,
-                  errors.firstName
-                    ? 'border-red-border focus:border-red-border focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
-                    : 'border-border focus:border-accent focus:shadow-accent-focus'
-                )}
-                value={form.firstName}
-                onChange={set('firstName')}
-                maxLength={30}
-              />
-              {errors.firstName && <p className="text-[12px] text-red mt-1">{errors.firstName}</p>}
-            </Field>
             <Field label="Last Name" required>
               <input
                 className={cn(
@@ -190,6 +176,20 @@ function CreateAccountModal({
                 maxLength={30}
               />
               {errors.lastName && <p className="text-[12px] text-red mt-1">{errors.lastName}</p>}
+            </Field>
+            <Field label="First Name" required>
+              <input
+                className={cn(
+                  inputClassName,
+                  errors.firstName
+                    ? 'border-red-border focus:border-red-border focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
+                    : 'border-border focus:border-accent focus:shadow-accent-focus'
+                )}
+                value={form.firstName}
+                onChange={set('firstName')}
+                maxLength={30}
+              />
+              {errors.firstName && <p className="text-[12px] text-red mt-1">{errors.firstName}</p>}
             </Field>
           </div>
 
@@ -391,20 +391,6 @@ function EditAccountDialog({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="First Name" required>
-              <input
-                className={cn(
-                  inputClassName,
-                  errors.firstName
-                    ? 'border-red-border focus:border-red-border focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
-                    : 'border-border focus:border-accent focus:shadow-accent-focus'
-                )}
-                value={form.firstName}
-                onChange={set('firstName')}
-                maxLength={30}
-              />
-              {errors.firstName && <p className="text-[12px] text-red mt-1">{errors.firstName}</p>}
-            </Field>
             <Field label="Last Name" required>
               <input
                 className={cn(
@@ -418,6 +404,20 @@ function EditAccountDialog({
                 maxLength={30}
               />
               {errors.lastName && <p className="text-[12px] text-red mt-1">{errors.lastName}</p>}
+            </Field>
+            <Field label="First Name" required>
+              <input
+                className={cn(
+                  inputClassName,
+                  errors.firstName
+                    ? 'border-red-border focus:border-red-border focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
+                    : 'border-border focus:border-accent focus:shadow-accent-focus'
+                )}
+                value={form.firstName}
+                onChange={set('firstName')}
+                maxLength={30}
+              />
+              {errors.firstName && <p className="text-[12px] text-red mt-1">{errors.firstName}</p>}
             </Field>
           </div>
 

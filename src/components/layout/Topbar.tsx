@@ -79,7 +79,7 @@ export function Topbar() {
         <div className="flex items-center gap-2 ml-2 pl-3 border-l border-border shrink-0 @max-[1023px]:pl-0 @max-[1023px]:ml-0 @max-[1023px]:border-l-0">
           <div className="flex flex-col items-end leading-tight justify-center @max-[1023px]:hidden">
             <span className="text-[12px] font-semibold text-text-primary mb-1">
-              {user ? `${user.firstName} ${user.lastName}` : ''}
+              {user ? `${user.lastName}, ${user.firstName}` : ''}
             </span>
             {user && (
               <span

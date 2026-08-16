@@ -162,7 +162,7 @@ export function TempPasswordToast({
         </button>
       </div>
       <p className="text-[12px] text-text-secondary mb-2.5">
-        {result.user.firstName} {result.user.lastName} ({result.user.role}) — {result.user.email}
+        {result.user.lastName}, {result.user.firstName} ({result.user.role}) — {result.user.email}
       </p>
       <div className="bg-surface-2 border border-border rounded-btn px-3 py-2 mb-2.5">
         <p className="text-[10px] font-semibold text-text-muted uppercase tracking-[0.6px] mb-1">

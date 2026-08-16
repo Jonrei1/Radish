@@ -83,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2 ml-2 pl-3 border-l border-border">
             <div className="flex flex-col items-end leading-tight">
               <span className="text-[12px] font-semibold text-text-primary">
-                {user.firstName} {user.lastName}
+                {user.lastName}, {user.firstName}
               </span>
               <span className="text-[10px] text-text-muted">System Administrator</span>
             </div>
