@@ -18,6 +18,10 @@ const UpdatePatientSchema = z
         message: 'Invalid date of birth format',
       }),
     sex: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+    addressStreet: z.string().min(1).max(200).optional(),
+    addressBarangay: z.string().min(1).max(100).optional(),
+    addressCity: z.string().min(1).max(100).optional(),
+    addressRegion: z.string().min(1).max(100).optional(),
   })
   .strict();
 
@@ -49,6 +53,11 @@ export async function GET(
         extension: patient.extension,
         dateOfBirth: patient.dateOfBirth,
         sex: patient.sex,
+        addressStreet: patient.addressStreet,
+        addressBarangay: patient.addressBarangay,
+        addressCity: patient.addressCity,
+        addressRegion: patient.addressRegion,
+        addressCountry: patient.addressCountry,
         isActive: patient.isActive,
         createdBy: patient.createdBy?.toString(),
         createdAt: patient.createdAt,
@@ -109,6 +118,18 @@ export async function PATCH(
     if (updates.sex !== undefined) {
       patient.sex = updates.sex as PatientSex;
     }
+    if (updates.addressStreet !== undefined) {
+      patient.addressStreet = updates.addressStreet.trim();
+    }
+    if (updates.addressBarangay !== undefined) {
+      patient.addressBarangay = updates.addressBarangay.trim();
+    }
+    if (updates.addressCity !== undefined) {
+      patient.addressCity = updates.addressCity.trim();
+    }
+    if (updates.addressRegion !== undefined) {
+      patient.addressRegion = updates.addressRegion.trim();
+    }
 
     await patient.save();
 
@@ -123,6 +144,11 @@ export async function PATCH(
         extension: patient.extension,
         dateOfBirth: patient.dateOfBirth,
         sex: patient.sex,
+        addressStreet: patient.addressStreet,
+        addressBarangay: patient.addressBarangay,
+        addressCity: patient.addressCity,
+        addressRegion: patient.addressRegion,
+        addressCountry: patient.addressCountry,
         isActive: patient.isActive,
         createdBy: patient.createdBy.toString(),
         createdAt: patient.createdAt,

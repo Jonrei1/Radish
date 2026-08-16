@@ -25,6 +25,10 @@ export interface CreatePatientInput {
   extension?: string;
   dateOfBirth: string;
   sex: 'MALE' | 'FEMALE' | 'OTHER';
+  addressStreet: string;
+  addressBarangay: string;
+  addressCity: string;
+  addressRegion: string;
 }
 
 export interface UpdatePatientInput {
@@ -34,6 +38,10 @@ export interface UpdatePatientInput {
   extension?: string | null;
   dateOfBirth?: string;
   sex?: 'MALE' | 'FEMALE' | 'OTHER';
+  addressStreet?: string;
+  addressBarangay?: string;
+  addressCity?: string;
+  addressRegion?: string;
 }
 
 export interface NoteRecord {

@@ -9,6 +9,11 @@ export interface PatientSummary {
   extension?: string | null;
   sex: 'MALE' | 'FEMALE' | 'OTHER';
   dateOfBirth: string;
+  addressStreet?: string;
+  addressBarangay?: string;
+  addressCity?: string;
+  addressRegion?: string;
+  addressCountry?: string;
   isActive?: boolean;
 }
 

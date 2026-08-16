@@ -1,10 +1,18 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useCreatePatient, PatientRecord } from '@/hooks/usePatients';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { AddressCombobox } from './AddressCombobox';
+import {
+  fetchPsgcRegions,
+  fetchPsgcCities,
+  fetchPsgcBarangays,
+  type PsgcItem,
+} from '@/lib/ph-locations';
 
 interface NewPatientModalProps {
   open: boolean;
@@ -27,6 +35,22 @@ const patientSchema = z.object({
       message: 'Date of birth must be in the past',
     }),
   sex: z.enum(['MALE', 'FEMALE', 'OTHER'], { message: 'Sex is required' }),
+  addressStreet: z.string().trim().min(1, 'Street address is required'),
+  addressBarangay: z
+    .string()
+    .trim()
+    .min(1, 'Barangay is required')
+    .max(100, 'Max 100 characters'),
+  addressCity: z
+    .string()
+    .trim()
+    .min(1, 'City / Municipality is required')
+    .max(100, 'Max 100 characters'),
+  addressRegion: z
+    .string()
+    .trim()
+    .min(1, 'Region is required')
+    .max(100, 'Max 100 characters'),
 });
 
 type FormData = z.infer<typeof patientSchema>;
@@ -56,11 +80,21 @@ function Field({
 export function NewPatientModal({ open, onClose, onCreated }: NewPatientModalProps) {
   const createPatient = useCreatePatient();
 
+  const [regions, setRegions] = useState<PsgcItem[]>([]);
+  const [cities, setCities] = useState<PsgcItem[]>([]);
+  const [barangays, setBarangays] = useState<PsgcItem[]>([]);
+
+  const [loadingRegions, setLoadingRegions] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingBarangays, setLoadingBarangays] = useState(false);
+
   const {
     register,
     handleSubmit,
     reset,
     setError,
+    control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(patientSchema),
@@ -71,8 +105,107 @@ export function NewPatientModal({ open, onClose, onCreated }: NewPatientModalPro
       extension: '',
       dateOfBirth: '',
       sex: undefined,
+      addressStreet: '',
+      addressBarangay: '',
+      addressCity: '',
+      addressRegion: '',
     },
   });
+
+  const selectedRegion = watch('addressRegion');
+  const selectedCity = watch('addressCity');
+
+  // Fetch Regions from PSGC Cloud API
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setLoadingRegions(true);
+    fetchPsgcRegions()
+      .then((data) => {
+        if (active) setRegions(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoadingRegions(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  // Fetch Cities when selectedRegion changes
+  useEffect(() => {
+    if (!open || !selectedRegion) {
+      setCities([]);
+      return;
+    }
+    const matchedRegion = regions.find(
+      (r) =>
+        r.name.toLowerCase() === selectedRegion.toLowerCase() ||
+        r.code === selectedRegion ||
+        selectedRegion.toLowerCase().includes(r.name.toLowerCase()) ||
+        r.name.toLowerCase().includes(selectedRegion.toLowerCase())
+    );
+
+    if (!matchedRegion) {
+      setCities([]);
+      return;
+    }
+
+    let active = true;
+    setLoadingCities(true);
+    fetchPsgcCities(matchedRegion.code)
+      .then((data) => {
+        if (active) setCities(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoadingCities(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open, selectedRegion, regions]);
+
+  // Fetch Barangays when selectedCity changes
+  useEffect(() => {
+    if (!open || !selectedCity) {
+      setBarangays([]);
+      return;
+    }
+    const matchedCity = cities.find(
+      (c) =>
+        c.name.toLowerCase() === selectedCity.toLowerCase() ||
+        c.code === selectedCity ||
+        selectedCity.toLowerCase().includes(c.name.toLowerCase()) ||
+        c.name.toLowerCase().includes(selectedCity.toLowerCase())
+    );
+
+    if (!matchedCity) {
+      setBarangays([]);
+      return;
+    }
+
+    let active = true;
+    setLoadingBarangays(true);
+    fetchPsgcBarangays(matchedCity.code, matchedCity.type)
+      .then((data) => {
+        if (active) setBarangays(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoadingBarangays(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open, selectedCity, cities]);
+
+  const regionOptions = Array.from(new Set(regions.map((r) => r.name)));
+  const cityOptions = Array.from(new Set(cities.map((c) => c.name)));
+  const barangayOptions = Array.from(new Set(barangays.map((b) => b.name)));
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -83,6 +216,10 @@ export function NewPatientModal({ open, onClose, onCreated }: NewPatientModalPro
         extension: data.extension || undefined,
         dateOfBirth: data.dateOfBirth,
         sex: data.sex,
+        addressStreet: data.addressStreet,
+        addressBarangay: data.addressBarangay,
+        addressCity: data.addressCity,
+        addressRegion: data.addressRegion,
       });
       toast.success('Patient registered successfully.');
       reset();
@@ -108,7 +245,7 @@ export function NewPatientModal({ open, onClose, onCreated }: NewPatientModalPro
       }}
       className="fixed inset-0 bg-black/45 backdrop-blur-[4px] z-[1000] flex items-center justify-center"
     >
-      <div className="bg-surface border border-border rounded-[10px] max-w-[500px] w-full mx-4 shadow-modal max-h-[90vh] flex flex-col">
+      <div className="bg-surface border border-border rounded-[10px] max-w-[560px] w-full mx-4 shadow-modal max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2">
@@ -200,6 +337,91 @@ export function NewPatientModal({ open, onClose, onCreated }: NewPatientModalPro
               </select>
             </Field>
           </div>
+
+          {/* Section: Address Information */}
+          <div className="mt-4 mb-2.5 text-[10px] font-bold uppercase tracking-[0.6px] text-text-muted border-b border-border/60 pb-1 flex justify-between items-center">
+            <span>Address Information</span>
+            <span className="text-[10px] font-medium text-red lowercase font-sans">* required</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5 mb-3">
+            <Controller
+              name="addressRegion"
+              control={control}
+              render={({ field }) => (
+                <AddressCombobox
+                  label="Region"
+                  required
+                  loading={loadingRegions}
+                  value={field.value}
+                  onChange={(val) => {
+                    field.onChange(val);
+                  }}
+                  options={regionOptions}
+                  placeholder="Select or type region..."
+                  error={errors.addressRegion?.message}
+                />
+              )}
+            />
+            <Controller
+              name="addressCity"
+              control={control}
+              render={({ field }) => (
+                <AddressCombobox
+                  label="City / Municipality"
+                  required
+                  loading={loadingCities}
+                  value={field.value}
+                  onChange={(val) => {
+                    field.onChange(val);
+                  }}
+                  options={cityOptions}
+                  placeholder={
+                    selectedRegion ? 'Select or type city...' : 'Select region first'
+                  }
+                  disabled={!selectedRegion && cityOptions.length === 0}
+                  error={errors.addressCity?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5 mb-3">
+            <Controller
+              name="addressBarangay"
+              control={control}
+              render={({ field }) => (
+                <AddressCombobox
+                  label="Barangay"
+                  required
+                  loading={loadingBarangays}
+                  value={field.value}
+                  onChange={(val) => {
+                    field.onChange(val);
+                  }}
+                  options={barangayOptions}
+                  placeholder={selectedCity ? 'Select or type barangay...' : 'Select city first'}
+                  disabled={!selectedCity && barangayOptions.length === 0}
+                  error={errors.addressBarangay?.message}
+                />
+              )}
+            />
+            <Field label="Country">
+              <input
+                className={`${inputClassName} bg-surface-2 text-text-muted border-border cursor-not-allowed`}
+                value="Philippines"
+                readOnly
+              />
+            </Field>
+          </div>
+
+          <Field label="Street / House No." required error={errors.addressStreet?.message}>
+            <input
+              className={`${inputClassName} ${errors.addressStreet ? 'border-red-border' : 'border-border'}`}
+              {...register('addressStreet')}
+              placeholder="e.g. 123 Taft Ave, Bldg A, Unit 4B"
+            />
+          </Field>
         </div>
 
         {/* Footer */}

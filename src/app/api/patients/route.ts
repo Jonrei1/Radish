@@ -15,6 +15,10 @@ const CreatePatientSchema = z
       message: 'Invalid date of birth format',
     }),
     sex: z.enum(['MALE', 'FEMALE', 'OTHER']),
+    addressStreet: z.string().trim().min(1, 'Street address is required').max(200),
+    addressBarangay: z.string().trim().min(1, 'Barangay is required').max(100),
+    addressCity: z.string().trim().min(1, 'City / Municipality is required').max(100),
+    addressRegion: z.string().trim().min(1, 'Region is required').max(100),
   })
   .strict();
 
@@ -63,6 +67,11 @@ export async function GET(req: NextRequest) {
       extension: p.extension,
       dateOfBirth: p.dateOfBirth,
       sex: p.sex,
+      addressStreet: p.addressStreet,
+      addressBarangay: p.addressBarangay,
+      addressCity: p.addressCity,
+      addressRegion: p.addressRegion,
+      addressCountry: p.addressCountry,
       isActive: p.isActive,
       createdBy: p.createdBy?.toString(),
       createdAt: p.createdAt,
@@ -103,7 +112,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { firstName, lastName, middleName, extension, dateOfBirth, sex } = parseResult.data;
+    const {
+      firstName,
+      lastName,
+      middleName,
+      extension,
+      dateOfBirth,
+      sex,
+      addressStreet,
+      addressBarangay,
+      addressCity,
+      addressRegion,
+    } = parseResult.data;
 
     // Concurrency-safe atomic patient code generation
     const patientCode = await getNextPatientCode();
@@ -116,6 +136,11 @@ export async function POST(req: NextRequest) {
       extension: extension?.trim() || undefined,
       dateOfBirth: new Date(dateOfBirth),
       sex: sex as PatientSex,
+      addressStreet: addressStreet.trim(),
+      addressBarangay: addressBarangay.trim(),
+      addressCity: addressCity.trim(),
+      addressRegion: addressRegion.trim(),
+      addressCountry: 'Philippines',
       isActive: true,
       createdBy: user._id,
     });
@@ -129,6 +154,11 @@ export async function POST(req: NextRequest) {
       extension: newPatient.extension,
       dateOfBirth: newPatient.dateOfBirth,
       sex: newPatient.sex,
+      addressStreet: newPatient.addressStreet,
+      addressBarangay: newPatient.addressBarangay,
+      addressCity: newPatient.addressCity,
+      addressRegion: newPatient.addressRegion,
+      addressCountry: newPatient.addressCountry,
       isActive: newPatient.isActive,
       createdBy: newPatient.createdBy.toString(),
       createdAt: newPatient.createdAt,

@@ -36,6 +36,17 @@ export default function PatientWorkspaceLayout({
       : 'Other'
     : '';
 
+  const addressParts = currentPatient
+    ? [
+        currentPatient.addressStreet,
+        currentPatient.addressBarangay,
+        currentPatient.addressCity,
+        currentPatient.addressRegion,
+        currentPatient.addressCountry || 'Philippines',
+      ].filter(Boolean)
+    : [];
+  const addressStr = addressParts.length > 0 ? addressParts.join(', ') : 'Not documented';
+
   useEffect(() => {
     if (patient) {
       setActivePatient(patient);
@@ -96,6 +107,17 @@ export default function PatientWorkspaceLayout({
                         {dob}
                       </strong>
                     </div>
+                    <div className="col-span-3">
+                      <span className="text-[9px] font-semibold text-text-muted uppercase tracking-[0.5px] block">
+                        Address
+                      </span>
+                      <span
+                        className="text-text-secondary text-[12px] truncate block"
+                        title={addressStr}
+                      >
+                        {addressStr}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -122,6 +144,10 @@ export default function PatientWorkspaceLayout({
                     <div className="flex flex-col gap-1">
                       <div className="h-2.5 bg-surface-2 rounded w-14" />
                       <div className="h-4 bg-surface-2 rounded w-20" />
+                    </div>
+                    <div className="col-span-3 flex flex-col gap-1">
+                      <div className="h-2.5 bg-surface-2 rounded w-12" />
+                      <div className="h-4 bg-surface-2 rounded w-48" />
                     </div>
                   </div>
                 </div>
